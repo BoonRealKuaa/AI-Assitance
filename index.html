@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="vi" data-theme="dark">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,80 +9,177 @@
 </head>
 <body>
 
-<header>
-  <div class="logo">✦</div>
-  <div class="header-info">
-    <h1>AI Assistant</h1>
-    <div class="status">
-      <div class="status-dot"></div>
-      <span>Đang hoạt động</span>
+<!-- ── Sidebar ── -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-header">
+    <div class="logo-sm">✦</div>
+    <button class="icon-btn sidebar-close" onclick="toggleSidebar()" title="Đóng sidebar">☰</button>
+  </div>
+
+  <button class="new-chat-btn" onclick="newChat()">
+    <span>✏️</span> Cuộc trò chuyện mới
+  </button>
+
+  <div class="search-box">
+    <span class="search-icon">🔍</span>
+    <input type="text" id="searchInput" placeholder="Tìm kiếm chat..." oninput="filterChats(this.value)">
+  </div>
+
+  <div class="sidebar-section">
+    <div class="section-label">Lịch sử</div>
+    <div id="chatList" class="chat-list">
+      <div class="empty-history">Chưa có cuộc trò chuyện nào</div>
     </div>
   </div>
-  <div class="header-actions">
-    <button class="icon-btn" onclick="clearChat()" title="Xóa chat">🗑</button>
-  </div>
-</header>
 
-<div id="messages">
-  <div class="welcome" id="welcome">
-    <div class="welcome-icon">✦</div>
-    <h2>Xin chào! Tôi là <span>AI Assistant</span></h2>
-    <p>Tôi có thể giúp bạn trả lời câu hỏi, viết code, phân tích dữ liệu, và nhiều hơn nữa.</p>
-    <div class="suggestions">
-      <button class="suggestion" onclick="sendSuggestion(this)">✍️ Viết một đoạn email</button>
-      <button class="suggestion" onclick="sendSuggestion(this)">💻 Giải thích một đoạn code</button>
-      <button class="suggestion" onclick="sendSuggestion(this)">🌐 Dịch văn bản</button>
-      <button class="suggestion" onclick="sendSuggestion(this)">📊 Phân tích dữ liệu</button>
-      <button class="suggestion" onclick="sendSuggestion(this)">🎨 Lên ý tưởng sáng tạo</button>
-      <button class="suggestion" onclick="sendSuggestion(this)">🔍 Tóm tắt nội dung</button>
+  <div class="sidebar-footer">
+    <div class="user-info">
+      <div class="user-avatar">AI</div>
+      <div class="user-details">
+        <span class="user-name">AI Assistant</span>
+        <span class="user-plan">Free plan</span>
+      </div>
     </div>
   </div>
-</div>
+</aside>
 
-<div class="input-area">
-  <div class="api-notice" id="apiNotice">
-    ✅ API key đã được cấu hình. Chatbot sẵn sàng sử dụng!
-    <button onclick="document.getElementById('apiNotice').style.display='none'" style="margin-left:auto;background:none;border:none;cursor:pointer;color:#a78bfa;font-size:16px">×</button>
+<!-- Overlay -->
+<div class="overlay" id="overlay" onclick="toggleSidebar()"></div>
+
+<!-- ── Main ── -->
+<div class="main" id="main">
+  <header>
+    <button class="icon-btn" onclick="toggleSidebar()" title="Menu">☰</button>
+    <div class="header-center">
+      <div class="logo">✦</div>
+      <div class="header-info">
+        <h1>AI Assistant</h1>
+        <div class="status"><div class="status-dot"></div><span>Đang hoạt động</span></div>
+      </div>
+    </div>
+    <div class="header-actions">
+      <button class="icon-btn" onclick="toggleTheme()" title="Dark/Light mode" id="themeBtn">🌙</button>
+      <button class="icon-btn" onclick="toggleTTS()" title="Text-to-Speech" id="ttsBtn">🔊</button>
+      <button class="icon-btn" onclick="exportChat()" title="Xuất chat">📤</button>
+      <div class="divider"></div>
+      <button class="icon-btn" onclick="clearChat()" title="Xóa chat">🗑</button>
+    </div>
+  </header>
+
+  <div id="toast"></div>
+
+  <div id="messages">
+    <div class="welcome" id="welcome">
+      <div class="welcome-icon">✦</div>
+      <h2>Xin chào! Tôi là <span>AI Assistant</span></h2>
+      <p>Tôi có thể giúp bạn trả lời câu hỏi, viết code, phân tích dữ liệu, và nhiều hơn nữa.</p>
+      <div class="suggestions">
+        <button class="suggestion" onclick="sendSuggestion(this)">✍️ Viết một đoạn email</button>
+        <button class="suggestion" onclick="sendSuggestion(this)">💻 Giải thích một đoạn code</button>
+        <button class="suggestion" onclick="sendSuggestion(this)">🌐 Dịch văn bản</button>
+        <button class="suggestion" onclick="sendSuggestion(this)">📊 Phân tích dữ liệu</button>
+        <button class="suggestion" onclick="sendSuggestion(this)">🎨 Lên ý tưởng sáng tạo</button>
+        <button class="suggestion" onclick="sendSuggestion(this)">🔍 Tóm tắt nội dung</button>
+      </div>
+    </div>
   </div>
-  <div class="input-wrapper">
-    <textarea id="userInput" placeholder="Nhắn tin..." rows="1"></textarea>
-    <button id="sendBtn" onclick="sendMessage()">
-      <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
-    </button>
+
+  <div class="input-area">
+    <div class="api-notice" id="apiNotice">
+      ✅ API key đã được cấu hình. Chatbot sẵn sàng sử dụng!
+      <button onclick="document.getElementById('apiNotice').style.display='none'" style="margin-left:auto;background:none;border:none;cursor:pointer;color:#a78bfa;font-size:16px">×</button>
+    </div>
+    <div class="input-wrapper">
+      <textarea id="userInput" placeholder="Nhắn tin..." rows="1"></textarea>
+      <button id="sendBtn" onclick="sendMessage()">
+        <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+      </button>
+    </div>
+    <div class="input-footer">Nhấn Enter để gửi · Shift+Enter để xuống dòng</div>
   </div>
-  <div class="input-footer">Nhấn Enter để gửi · Shift+Enter để xuống dòng</div>
 </div>
 
 <script>
-  const API_KEY = 'YOUR_API_KEY'; // ← Thay bằng API key của bạn
+  const API_KEY = 'YOUR_API_KEY';
   const MODEL = 'claude-sonnet-4-20250514';
 
   let conversationHistory = [];
+  let allSessions = []; // lưu tất cả session
+  let currentSessionId = null;
   let isLoading = false;
+  let ttsEnabled = false;
 
   const messagesEl = document.getElementById('messages');
   const inputEl = document.getElementById('userInput');
   const sendBtn = document.getElementById('sendBtn');
 
-  // Auto-resize textarea
-  inputEl.addEventListener('input', () => {
-    inputEl.style.height = 'auto';
-    inputEl.style.height = Math.min(inputEl.scrollHeight, 160) + 'px';
-  });
-
-  inputEl.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      sendMessage();
-    }
-  });
-
-  function sendSuggestion(btn) {
-    inputEl.value = btn.textContent.replace(/^[^\w\s]+\s*/, '').trim();
-    sendMessage();
+  // ── Sidebar ───────────────────────────────────────────
+  function toggleSidebar() {
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('overlay');
+    const isOpen = sidebar.classList.toggle('open');
+    overlay.classList.toggle('show', isOpen);
   }
 
-  function clearChat() {
+  // ── Session / History ─────────────────────────────────
+  function saveSession() {
+    if (conversationHistory.length === 0) return;
+    const firstMsg = conversationHistory[0].content.slice(0, 40);
+    const title = firstMsg.length >= 40 ? firstMsg + '...' : firstMsg;
+    if (currentSessionId) {
+      const idx = allSessions.findIndex(s => s.id === currentSessionId);
+      if (idx > -1) { allSessions[idx].history = [...conversationHistory]; }
+    } else {
+      currentSessionId = Date.now();
+      allSessions.unshift({ id: currentSessionId, title, history: [...conversationHistory], date: new Date() });
+    }
+    renderChatList();
+  }
+
+  function renderChatList(filter = '') {
+    const list = document.getElementById('chatList');
+    const filtered = allSessions.filter(s => s.title.toLowerCase().includes(filter.toLowerCase()));
+    if (filtered.length === 0) {
+      list.innerHTML = `<div class="empty-history">${filter ? 'Không tìm thấy' : 'Chưa có cuộc trò chuyện nào'}</div>`;
+      return;
+    }
+    list.innerHTML = filtered.map(s => `
+      <div class="chat-item ${s.id === currentSessionId ? 'active' : ''}" onclick="loadSession(${s.id})">
+        <span class="chat-item-icon">💬</span>
+        <span class="chat-item-title">${escHtml(s.title)}</span>
+        <button class="chat-item-delete" onclick="deleteSession(event, ${s.id})" title="Xóa">✕</button>
+      </div>
+    `).join('');
+  }
+
+  function loadSession(id) {
+    const session = allSessions.find(s => s.id === id);
+    if (!session) return;
+    currentSessionId = id;
+    conversationHistory = [...session.history];
+    messagesEl.innerHTML = '';
+    conversationHistory.forEach(msg => {
+      if (msg.role !== 'system') appendMessage(msg.role === 'user' ? 'user' : 'ai', msg.content, false);
+    });
+    renderChatList();
+    // Close sidebar on mobile
+    if (window.innerWidth < 768) toggleSidebar();
+    showToast('📂 Đã mở cuộc trò chuyện');
+  }
+
+  function deleteSession(e, id) {
+    e.stopPropagation();
+    allSessions = allSessions.filter(s => s.id !== id);
+    if (currentSessionId === id) { currentSessionId = null; }
+    renderChatList();
+    showToast('🗑 Đã xóa');
+  }
+
+  function filterChats(val) { renderChatList(val); }
+
+  function newChat() {
+    saveSession();
+    currentSessionId = null;
     conversationHistory = [];
     messagesEl.innerHTML = `
       <div class="welcome" id="welcome">
@@ -98,87 +195,163 @@
           <button class="suggestion" onclick="sendSuggestion(this)">🔍 Tóm tắt nội dung</button>
         </div>
       </div>`;
+    renderChatList();
+    if (window.innerWidth < 768) toggleSidebar();
+    showToast('✏️ Cuộc trò chuyện mới');
   }
 
-  function appendMessage(role, content) {
+  // ── Toast ─────────────────────────────────────────────
+  function showToast(msg, duration = 2000) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), duration);
+  }
+
+  // ── Theme ─────────────────────────────────────────────
+  function toggleTheme() {
+    const html = document.documentElement;
+    const isDark = html.getAttribute('data-theme') === 'dark';
+    html.setAttribute('data-theme', isDark ? 'light' : 'dark');
+    document.getElementById('themeBtn').textContent = isDark ? '☀️' : '🌙';
+    showToast(isDark ? '☀️ Light mode' : '🌙 Dark mode');
+  }
+
+  // ── TTS ───────────────────────────────────────────────
+  function toggleTTS() {
+    ttsEnabled = !ttsEnabled;
+    const btn = document.getElementById('ttsBtn');
+    btn.textContent = ttsEnabled ? '🔇' : '🔊';
+    btn.classList.toggle('active', ttsEnabled);
+    showToast(ttsEnabled ? '🔊 Đọc to: BẬT' : '🔇 Đọc to: TẮT');
+  }
+
+  function speakText(text) {
+    if (!ttsEnabled || !window.speechSynthesis) return;
+    window.speechSynthesis.cancel();
+    const plain = text.replace(/<[^>]*>/g, '').replace(/[#*`]/g, '');
+    const utter = new SpeechSynthesisUtterance(plain);
+    utter.lang = 'vi-VN';
+    window.speechSynthesis.speak(utter);
+  }
+
+  // ── Export ────────────────────────────────────────────
+  function exportChat() {
+    if (conversationHistory.length === 0) { showToast('⚠️ Chưa có tin nhắn để xuất'); return; }
+    const now = new Date();
+    let content = `AI ASSISTANT — Lịch sử trò chuyện\nXuất lúc: ${now.toLocaleDateString('vi-VN')} ${now.toLocaleTimeString('vi-VN')}\n${'─'.repeat(50)}\n\n`;
+    conversationHistory.forEach(msg => {
+      content += `${msg.role === 'user' ? '👤 Bạn' : '✦ AI'}:\n${msg.content.replace(/<[^>]*>/g, '')}\n\n`;
+    });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([content], { type: 'text/plain;charset=utf-8' }));
+    a.download = `chat-${now.getTime()}.txt`;
+    a.click();
+    showToast('📤 Đã xuất file chat!');
+  }
+
+  // ── Copy ──────────────────────────────────────────────
+  function copyMessage(btn) {
+    const text = btn.closest('.bubble').innerText.replace('📋', '').trim();
+    navigator.clipboard.writeText(text).then(() => {
+      btn.textContent = '✅'; setTimeout(() => btn.textContent = '📋', 1500);
+      showToast('📋 Đã copy!');
+    });
+  }
+
+  function sendSuggestion(btn) {
+    inputEl.value = btn.textContent.replace(/^[^\w\s]+\s*/, '').trim();
+    sendMessage();
+  }
+
+  function clearChat() {
+    if (conversationHistory.length === 0) return;
+    if (!confirm('Xóa cuộc trò chuyện này?')) return;
+    window.speechSynthesis && window.speechSynthesis.cancel();
+    conversationHistory = [];
+    currentSessionId = null;
+    messagesEl.innerHTML = `
+      <div class="welcome" id="welcome">
+        <div class="welcome-icon">✦</div>
+        <h2>Xin chào! Tôi là <span>AI Assistant</span></h2>
+        <p>Tôi có thể giúp bạn trả lời câu hỏi, viết code, phân tích dữ liệu, và nhiều hơn nữa.</p>
+        <div class="suggestions">
+          <button class="suggestion" onclick="sendSuggestion(this)">✍️ Viết một đoạn email</button>
+          <button class="suggestion" onclick="sendSuggestion(this)">💻 Giải thích một đoạn code</button>
+          <button class="suggestion" onclick="sendSuggestion(this)">🌐 Dịch văn bản</button>
+          <button class="suggestion" onclick="sendSuggestion(this)">📊 Phân tích dữ liệu</button>
+          <button class="suggestion" onclick="sendSuggestion(this)">🎨 Lên ý tưởng sáng tạo</button>
+          <button class="suggestion" onclick="sendSuggestion(this)">🔍 Tóm tắt nội dung</button>
+        </div>
+      </div>`;
+    showToast('🗑 Đã xóa lịch sử chat');
+  }
+
+  // ── Render message ────────────────────────────────────
+  function appendMessage(role, content, withCopy = true) {
     const welcome = document.getElementById('welcome');
     if (welcome) welcome.remove();
-
     const div = document.createElement('div');
     div.className = `message ${role}`;
-
     const avatar = document.createElement('div');
     avatar.className = 'avatar';
     avatar.textContent = role === 'user' ? '👤' : '✦';
-
     const bubble = document.createElement('div');
     bubble.className = 'bubble';
     bubble.innerHTML = formatContent(content);
-
-    div.appendChild(avatar);
-    div.appendChild(bubble);
+    if (withCopy) {
+      const copyBtn = document.createElement('button');
+      copyBtn.className = 'copy-btn'; copyBtn.textContent = '📋'; copyBtn.title = 'Copy';
+      copyBtn.onclick = () => copyMessage(copyBtn);
+      bubble.appendChild(copyBtn);
+    }
+    div.appendChild(avatar); div.appendChild(bubble);
     messagesEl.appendChild(div);
     messagesEl.scrollTop = messagesEl.scrollHeight;
+    if (role === 'ai') speakText(content);
     return bubble;
   }
 
   function formatContent(text) {
-    // Code blocks
-    text = text.replace(/```(\w*)\n?([\s\S]*?)```/g, (_, lang, code) =>
-      `<pre><code>${escHtml(code.trim())}</code></pre>`);
-    // Inline code
+    text = text.replace(/```(\w*)\n?([\s\S]*?)```/g, (_, l, code) => `<pre><code>${escHtml(code.trim())}</code></pre>`);
     text = text.replace(/`([^`]+)`/g, '<code>$1</code>');
-    // Bold
     text = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-    // Line breaks
     text = text.replace(/\n/g, '<br>');
     return text;
   }
 
-  function escHtml(str) {
-    return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-  }
+  function escHtml(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
   function showTyping() {
     const welcome = document.getElementById('welcome');
     if (welcome) welcome.remove();
-
-    const div = document.createElement('div');
-    div.className = 'message ai';
-    div.id = 'typing';
-
-    const avatar = document.createElement('div');
-    avatar.className = 'avatar';
-    avatar.textContent = '✦';
-
-    const bubble = document.createElement('div');
-    bubble.className = 'bubble';
+    const div = document.createElement('div'); div.className = 'message ai'; div.id = 'typing';
+    const avatar = document.createElement('div'); avatar.className = 'avatar'; avatar.textContent = '✦';
+    const bubble = document.createElement('div'); bubble.className = 'bubble';
     bubble.innerHTML = '<div class="typing-indicator"><span></span><span></span><span></span></div>';
-
-    div.appendChild(avatar);
-    div.appendChild(bubble);
-    messagesEl.appendChild(div);
+    div.appendChild(avatar); div.appendChild(bubble); messagesEl.appendChild(div);
     messagesEl.scrollTop = messagesEl.scrollHeight;
   }
 
-  function removeTyping() {
-    const el = document.getElementById('typing');
-    if (el) el.remove();
-  }
+  function removeTyping() { const el = document.getElementById('typing'); if (el) el.remove(); }
 
+  inputEl.addEventListener('input', () => {
+    inputEl.style.height = 'auto';
+    inputEl.style.height = Math.min(inputEl.scrollHeight, 160) + 'px';
+  });
+  inputEl.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+  });
+
+  // ── Send ──────────────────────────────────────────────
   async function sendMessage() {
     const text = inputEl.value.trim();
     if (!text || isLoading) return;
-
-    isLoading = true;
-    sendBtn.disabled = true;
-    inputEl.value = '';
-    inputEl.style.height = 'auto';
-
+    isLoading = true; sendBtn.disabled = true;
+    inputEl.value = ''; inputEl.style.height = 'auto';
     appendMessage('user', text);
     conversationHistory.push({ role: 'user', content: text });
     showTyping();
-
     try {
       const response = await fetch('https://api.anthropic.com/v1/messages', {
         method: 'POST',
@@ -189,33 +362,26 @@
           'anthropic-dangerous-direct-browser-calls': 'true'
         },
         body: JSON.stringify({
-          model: MODEL,
-          max_tokens: 1024,
+          model: MODEL, max_tokens: 1024,
           system: 'Bạn là một trợ lý AI thông minh, thân thiện và hữu ích. Trả lời bằng tiếng Việt nếu người dùng dùng tiếng Việt.',
           messages: conversationHistory
         })
       });
       const data = await response.json();
       removeTyping();
-
       if (data.error) {
         appendMessage('ai', `❌ Lỗi: ${data.error.message}`);
       } else {
         const reply = data.content[0].text;
         conversationHistory.push({ role: 'assistant', content: reply });
         appendMessage('ai', reply);
+        saveSession();
       }
     } catch (err) {
       removeTyping();
-      appendMessage('ai', `❌ Lỗi kết nối: <code>${err.message}</code><br><br>
-        Nếu bạn đang mở file trực tiếp (file://), hãy thử:<br>
-        1. Dùng <strong>VS Code + Live Server</strong> extension<br>
-        2. Hoặc chạy: <code>python3 -m http.server 3000</code> rồi vào <code>localhost:3000</code>`);
+      appendMessage('ai', `❌ Lỗi kết nối: <code>${err.message}</code><br>Chạy: <code>python3 -m http.server 3000</code>`);
     }
-
-    isLoading = false;
-    sendBtn.disabled = false;
-    inputEl.focus();
+    isLoading = false; sendBtn.disabled = false; inputEl.focus();
   }
 </script>
 </body>
