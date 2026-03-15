@@ -464,7 +464,7 @@
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           model: MODEL, max_tokens: 1024,
-          system: 'Bạn là một trợ lý AI thông minh, thân thiện và hữu ích. Trả lời bằng tiếng Việt nếu người dùng dùng tiếng Việt.',
+          system: t('system'),
           messages: conversationHistory
         })
       });
