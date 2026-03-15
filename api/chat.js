@@ -1,27 +1,14 @@
-export const config = { runtime: 'edge' };
-
-export default async function handler(req) {
-  // Chỉ cho phép POST
+export default async function handler(req, res) {
   if (req.method !== 'POST') {
-    return new Response(JSON.stringify({ error: 'Method not allowed' }), {
-      status: 405,
-      headers: { 'Content-Type': 'application/json' }
-    });
+    return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  // Lấy API key từ Vercel Environment Variables
   const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey) {
-    return new Response(JSON.stringify({ error: { message: 'API key chưa được cấu hình trên server' } }), {
-      status: 500,
-      headers: { 'Content-Type': 'application/json' }
-    });
+    return res.status(500).json({ error: { message: 'API key chưa được cấu hình' } });
   }
 
   try {
-    const body = await req.json();
-
-    // Gọi Anthropic API từ server (không lộ key ra client)
     const response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: {
@@ -30,25 +17,16 @@ export default async function handler(req) {
         'anthropic-version': '2023-06-01'
       },
       body: JSON.stringify({
-        model: body.model || 'claude-sonnet-4-20250514',
-        max_tokens: body.max_tokens || 1024,
-        system: body.system || 'Bạn là trợ lý AI thông minh, thân thiện và hữu ích.',
-        messages: body.messages
+        model: req.body.model || 'claude-sonnet-4-20250514',
+        max_tokens: req.body.max_tokens || 1024,
+        system: req.body.system,
+        messages: req.body.messages
       })
     });
 
     const data = await response.json();
-    return new Response(JSON.stringify(data), {
-      status: response.status,
-      headers: {
-        'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': '*'
-      }
-    });
+    return res.status(response.status).json(data);
   } catch (err) {
-    return new Response(JSON.stringify({ error: { message: err.message } }), {
-      status: 500,
-      headers: { 'Content-Type': 'application/json' }
-    });
+    return res.status(500).json({ error: { message: err.message } });
   }
 }
