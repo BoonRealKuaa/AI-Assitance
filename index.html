@@ -58,7 +58,12 @@
       </div>
     </div>
     <div class="header-actions">
-      <button class="icon-btn" onclick="toggleTheme()" title="Dark/Light mode" id="themeBtn">🌙</button>
+      <div class="lang-selector">
+      <button class="lang-btn active" id="langVI" onclick="setLang('vi')">VI</button>
+      <button class="lang-btn" id="langEN" onclick="setLang('en')">EN</button>
+    </div>
+    <div class="divider"></div>
+    <button class="icon-btn" onclick="toggleTheme()" title="Dark/Light mode" id="themeBtn">🌙</button>
       <button class="icon-btn" onclick="toggleTTS()" title="Text-to-Speech" id="ttsBtn">🔊</button>
       <button class="icon-btn" onclick="exportChat()" title="Xuất chat">📤</button>
       <div class="divider"></div>
@@ -102,6 +107,102 @@
 <script>
   // API key được lưu an toàn trong Vercel Environment Variables
   const MODEL = 'claude-sonnet-4-6'; // Model mới nhất
+
+  // ── Language ──────────────────────────────────────────
+  const LANGS = {
+    vi: {
+      newChat: 'Cuộc trò chuyện mới',
+      search: 'Tìm kiếm chat...',
+      history: 'LỊCH SỬ',
+      empty: 'Chưa có cuộc trò chuyện nào',
+      notFound: 'Không tìm thấy',
+      plan: 'Free plan',
+      welcome_title: 'Xin chào! Tôi là',
+      welcome_sub: 'Tôi có thể giúp bạn trả lời câu hỏi, viết code, phân tích dữ liệu, và nhiều hơn nữa.',
+      placeholder: 'Nhắn tin...',
+      footer: 'Nhấn Enter để gửi · Shift+Enter để xuống dòng',
+      notice: '✅ API key đã được cấu hình. Chatbot sẵn sàng sử dụng!',
+      suggestions: ['✍️ Viết một đoạn email','💻 Giải thích một đoạn code','🌐 Dịch văn bản','📊 Phân tích dữ liệu','🎨 Lên ý tưởng sáng tạo','🔍 Tóm tắt nội dung'],
+      system: 'Bạn là AI Assistant thông minh, thân thiện và hữu ích. Không đề cập đến tên model hay phiên bản cụ thể. Trả lời bằng tiếng Việt.',
+      toast_lang: '🇻🇳 Tiếng Việt',
+      clear_confirm: 'Xóa toàn bộ lịch sử chat?',
+      toast_clear: '🗑 Đã xóa lịch sử chat',
+      toast_new: '✏️ Cuộc trò chuyện mới',
+      toast_copy: '📋 Đã copy!',
+      toast_export: '📤 Đã xuất file chat!',
+      toast_export_empty: '⚠️ Chưa có tin nhắn để xuất',
+      toast_load: '📂 Đã mở cuộc trò chuyện',
+      toast_delete: '🗑 Đã xóa',
+      status: 'Đang hoạt động',
+    },
+    en: {
+      newChat: 'New conversation',
+      search: 'Search chats...',
+      history: 'HISTORY',
+      empty: 'No conversations yet',
+      notFound: 'Not found',
+      plan: 'Free plan',
+      welcome_title: 'Hello! I am',
+      welcome_sub: 'I can help you answer questions, write code, analyze data, and much more.',
+      placeholder: 'Message...',
+      footer: 'Press Enter to send · Shift+Enter for new line',
+      notice: '✅ API key configured. Chatbot is ready!',
+      suggestions: ['✍️ Write an email','💻 Explain some code','🌐 Translate text','📊 Analyze data','🎨 Brainstorm ideas','🔍 Summarize content'],
+      system: 'You are a smart, friendly and helpful AI Assistant. Do not mention specific model names or versions. Reply in English.',
+      toast_lang: '🇬🇧 English',
+      clear_confirm: 'Delete all chat history?',
+      toast_clear: '🗑 Chat history cleared',
+      toast_new: '✏️ New conversation',
+      toast_copy: '📋 Copied!',
+      toast_export: '📤 Chat exported!',
+      toast_export_empty: '⚠️ No messages to export',
+      toast_load: '📂 Conversation loaded',
+      toast_delete: '🗑 Deleted',
+      status: 'Active',
+    }
+  };
+
+  let currentLang = 'vi';
+
+  function t(key) { return LANGS[currentLang][key]; }
+
+  function setLang(lang) {
+    currentLang = lang;
+    document.getElementById('langVI').classList.toggle('active', lang === 'vi');
+    document.getElementById('langEN').classList.toggle('active', lang === 'en');
+    applyLang();
+    showToast(t('toast_lang'));
+  }
+
+  function applyLang() {
+    const L = LANGS[currentLang];
+    // Sidebar
+    const newChatBtn = document.querySelector('.new-chat-btn');
+    if (newChatBtn) newChatBtn.innerHTML = `<span>✏️</span> ${L.newChat}`;
+    const searchInput = document.getElementById('searchInput');
+    if (searchInput) searchInput.placeholder = L.search;
+    const sectionLabel = document.querySelector('.section-label');
+    if (sectionLabel) sectionLabel.textContent = L.history;
+    const userPlan = document.querySelector('.user-plan');
+    if (userPlan) userPlan.textContent = L.plan;
+    // Status
+    document.querySelector('.status span').textContent = L.status;
+    // Input
+    document.getElementById('userInput').placeholder = L.placeholder;
+    document.querySelector('.input-footer').textContent = L.footer;
+    // Notice
+    const notice = document.getElementById('apiNotice');
+    if (notice && notice.style.display !== 'none') {
+      notice.childNodes[0].textContent = L.notice;
+    }
+    // Welcome (nếu đang hiện)
+    const welcome = document.getElementById('welcome');
+    if (welcome) {
+      welcome.querySelector('p').textContent = L.welcome_sub;
+      const suggs = welcome.querySelectorAll('.suggestion');
+      L.suggestions.forEach((s, i) => { if (suggs[i]) suggs[i].textContent = s; });
+    }
+  }
 
   let conversationHistory = [];
   let allSessions = []; // lưu tất cả session
