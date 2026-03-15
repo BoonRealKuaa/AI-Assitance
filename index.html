@@ -76,7 +76,7 @@
   <div id="messages">
     <div class="welcome" id="welcome">
       <div class="welcome-icon">✦</div>
-      <h2>Xin chào! Tôi là <span>AI Assistant</span></h2>
+      <h2 id="welcomeTitle">Xin chào! Tôi là <span>AI Assistant</span></h2>
       <p>Tôi có thể giúp bạn trả lời câu hỏi, viết code, phân tích dữ liệu, và nhiều hơn nữa.</p>
       <div class="suggestions">
         <button class="suggestion" onclick="sendSuggestion(this)">✍️ Viết một đoạn email</button>
@@ -185,6 +185,9 @@
     if (sectionLabel) sectionLabel.textContent = L.history;
     const userPlan = document.querySelector('.user-plan');
     if (userPlan) userPlan.textContent = L.plan;
+    // Welcome title
+    const welcomeTitle = document.getElementById('welcomeTitle');
+    if (welcomeTitle) welcomeTitle.innerHTML = `${L.welcome_title} <span>AI Assistant</span>`;
     // Status
     document.querySelector('.status span').textContent = L.status;
     // Input
@@ -285,7 +288,7 @@
     messagesEl.innerHTML = `
       <div class="welcome" id="welcome">
         <div class="welcome-icon">✦</div>
-        <h2>Xin chào! Tôi là <span>AI Assistant</span></h2>
+        <h2 id="welcomeTitle">Xin chào! Tôi là <span>AI Assistant</span></h2>
         <p>Tôi có thể giúp bạn trả lời câu hỏi, viết code, phân tích dữ liệu, và nhiều hơn nữa.</p>
         <div class="suggestions">
           <button class="suggestion" onclick="sendSuggestion(this)">✍️ Viết một đoạn email</button>
@@ -374,7 +377,7 @@
     messagesEl.innerHTML = `
       <div class="welcome" id="welcome">
         <div class="welcome-icon">✦</div>
-        <h2>Xin chào! Tôi là <span>AI Assistant</span></h2>
+        <h2 id="welcomeTitle">Xin chào! Tôi là <span>AI Assistant</span></h2>
         <p>Tôi có thể giúp bạn trả lời câu hỏi, viết code, phân tích dữ liệu, và nhiều hơn nữa.</p>
         <div class="suggestions">
           <button class="suggestion" onclick="sendSuggestion(this)">✍️ Viết một đoạn email</button>
@@ -450,10 +453,15 @@
     if (!text || isLoading) return;
     isLoading = true; sendBtn.disabled = true;
     // Xóa input ngay lập tức
+    // Xóa input
     inputEl.value = '';
     inputEl.style.height = 'auto';
-    inputEl.blur();
-    inputEl.focus();
+    inputEl.setAttribute('value', '');
+    requestAnimationFrame(() => {
+      inputEl.value = '';
+      inputEl.style.height = 'auto';
+      inputEl.focus();
+    });
     appendMessage('user', text);
     conversationHistory.push({ role: 'user', content: text });
     showTyping();
