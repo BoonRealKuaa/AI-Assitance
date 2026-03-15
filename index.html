@@ -101,7 +101,7 @@
 
 <script>
   // API key được lưu an toàn trong Vercel Environment Variables
-  const MODEL = 'claude-sonnet-4-20250514';
+  const MODEL = 'claude-sonnet-4-6'; // Model mới nhất
 
   let conversationHistory = [];
   let allSessions = []; // lưu tất cả session
@@ -348,7 +348,11 @@
     const text = inputEl.value.trim();
     if (!text || isLoading) return;
     isLoading = true; sendBtn.disabled = true;
-    inputEl.value = ''; inputEl.style.height = 'auto';
+    // Xóa input ngay lập tức
+    inputEl.value = '';
+    inputEl.style.height = 'auto';
+    inputEl.blur();
+    inputEl.focus();
     appendMessage('user', text);
     conversationHistory.push({ role: 'user', content: text });
     showTyping();
